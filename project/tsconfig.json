@@ -1,0 +1,40 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compileOnSave": false,
+  "files": [],
+  "references": [
+    {
+      "path": "./apps/user"
+    },
+    {
+      "path": "./post-e2e"
+    },
+    {
+      "path": "./post"
+    },
+    {
+      "path": "./apps/post-e2e"
+    },
+    {
+      "path": "./apps/post"
+    },
+    {
+      "path": "./apps/notification-e2e"
+    },
+    {
+      "path": "./apps/notification"
+    },
+    {
+      "path": "./apps/media-downloader-e2e"
+    },
+    {
+      "path": "./apps/media-downloader"
+    },
+    {
+      "path": "./apps/api-gateway-e2e"
+    },
+    {
+      "path": "./apps/api-gateway"
+    }
+  ]
+}
