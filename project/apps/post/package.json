@@ -62,10 +62,51 @@
         "options": {
           "passWithNoTests": true
         }
+      },
+      "db-validate": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "npx prisma validate",
+          "cwd": "apps/post"
+        }
+      },
+      "db-generate": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "npx prisma generate",
+          "cwd": "apps/post"
+        }
+      },
+      "db-migrate": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "npx prisma migrate dev",
+          "cwd": "apps/post"
+        }
+      },
+      "db-reset": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "npx prisma migrate reset --force",
+          "cwd": "apps/post"
+        }
+      },
+      "db-fill": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "npx prisma db seed",
+          "cwd": "apps/post"
+        }
       }
     }
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "devDependencies": {
     "@nestjs/testing": "^11.0.0"
+  },
+  "dependencies": {
+    "dotenv": "^18.0.9"
   }
 }

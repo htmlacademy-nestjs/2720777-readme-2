@@ -1,55 +1,38 @@
 import { Injectable } from '@nestjs/common';
-import { randomUUID } from 'node:crypto';
-import { Comment } from '@project/shared/app/types';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 
 @Injectable()
 export class CommentRepository {
-  private readonly comments = new Map<string, Comment>();
+  constructor(private readonly prisma: PrismaService) {}
 
-  async findById(id: string): Promise<Comment | null> {
-    return this.comments.get(id) ?? null;
+  findByPostId(postId: string) {
+    return this.prisma.comment.findMany({ where: { postId } });
   }
 
-  async findByPostId(postId: string): Promise<Comment[]> {
-    return [...this.comments.values()].filter((c) => c.postId === postId);
+  findById(id: string) {
+    return this.prisma.comment.findUnique({ where: { id } });
   }
 
-  async create(
-    postId: string,
-    dto: CreateCommentDto,
-    authorId: string,
-  ): Promise<Comment> {
-    const now = new Date();
-    const comment: Comment = {
-      id: randomUUID(),
-      postId,
-      authorId,
-      content: dto.content,
-      createdAt: now,
-      updatedAt: now,
-    };
-    this.comments.set(comment.id, comment);
-    return comment;
+  create(postId: string, dto: CreateCommentDto, authorId: string) {
+    return this.prisma.comment.create({
+      data: {
+        postId,
+        content: dto.content,
+        authorId,
+      },
+    });
   }
 
-  async update(id: string, dto: UpdateCommentDto): Promise<Comment | null> {
-    const existing = this.comments.get(id);
-    if (!existing) {
-      return null;
-    }
-
-    const updated: Comment = {
-      ...existing,
-      ...dto,
-      updatedAt: new Date(),
-    };
-    this.comments.set(id, updated);
-    return updated;
+  update(id: string, dto: UpdateCommentDto) {
+    return this.prisma.comment.update({
+      where: { id },
+      data: dto,
+    });
   }
 
-  async remove(id: string): Promise<boolean> {
-    return this.comments.delete(id);
+  remove(id: string) {
+    return this.prisma.comment.delete({ where: { id } });
   }
 }
