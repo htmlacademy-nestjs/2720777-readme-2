@@ -3,13 +3,14 @@ import { Post } from '@project/shared/app/types';
 import { PostRepository } from './post.repository';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { QueryPostDto } from './dto/query-post.dto';
 
 @Injectable()
 export class PostService {
   constructor(private readonly postRepository: PostRepository) {}
 
-  async findAll(): Promise<Post[]> {
-    return this.postRepository.findAll();
+  async findAll(query: QueryPostDto) {
+    return this.postRepository.findAll(query);
   }
 
   async findById(id: string): Promise<Post> {
@@ -37,22 +38,6 @@ export class PostService {
     if (!removed) {
       throw new NotFoundException('Публикация не найдена');
     }
-  }
-
-  async addLike(postId: string, userId: string): Promise<Post> {
-    const post = await this.postRepository.addLike(postId, userId);
-    if (!post) {
-      throw new NotFoundException('Публикация не найдена');
-    }
-    return post;
-  }
-
-  async removeLike(postId: string, userId: string): Promise<Post> {
-    const post = await this.postRepository.removeLike(postId, userId);
-    if (!post) {
-      throw new NotFoundException('Публикация не найдена');
-    }
-    return post;
   }
 
   async repost(postId: string, userId: string): Promise<Post> {

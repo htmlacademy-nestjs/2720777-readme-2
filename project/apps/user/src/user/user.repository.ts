@@ -18,4 +18,8 @@ export class UserRepository {
     const createdUser = new this.userModel(userData);
     return createdUser.save();
   }
+
+  async updatePassword(id: string, passwordHash: string): Promise<void> {
+    await this.userModel.updateOne({ _id: id }, { passwordHash }).exec();
+  }
 }

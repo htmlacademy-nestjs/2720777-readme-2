@@ -13,15 +13,14 @@ export class AuthController {
 
   @Post('register')
   @ApiOperation({})
-  register(@Body() dto: CreateUserDto) {
-    const user = this.authService.register(dto);
+  async register(@Body() dto: CreateUserDto) {
+    const user = await this.authService.register(dto);
     return plainToInstance(UserRdo, user, { excludeExtraneousValues: true });
   }
 
   @Post('login')
   @ApiOperation({})
-  login(@Body() dto: LoginUserDto) {
-    const user = this.authService.validateUser(dto);
-    return plainToInstance(UserRdo, user, { excludeExtraneousValues: true });
+  async login(@Body() dto: LoginUserDto) {
+    return this.authService.login(dto);
   }
 }

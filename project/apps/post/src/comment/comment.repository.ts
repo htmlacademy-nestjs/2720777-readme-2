@@ -2,20 +2,26 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
+import { QueryCommentDto } from './dto/query-comment.dto';
 
 @Injectable()
 export class CommentRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  findByPostId(postId: string) {
-    return this.prisma.comment.findMany({ where: { postId } });
+  async findByPostId(postId: string, query: QueryCommentDto) {
+    return this.prisma.comment.findMany({
+      where: { postId },
+      take: query.limit,
+      skip: query.offset,
+      orderBy: { createdAt: 'desc' }, // Сначала новые
+    });
   }
 
-  findById(id: string) {
+  async findById(id: string) {
     return this.prisma.comment.findUnique({ where: { id } });
   }
 
-  create(postId: string, dto: CreateCommentDto, authorId: string) {
+  async create(postId: string, dto: CreateCommentDto, authorId: string) {
     return this.prisma.comment.create({
       data: {
         postId,
@@ -25,14 +31,14 @@ export class CommentRepository {
     });
   }
 
-  update(id: string, dto: UpdateCommentDto) {
+  async update(id: string, dto: UpdateCommentDto) {
     return this.prisma.comment.update({
       where: { id },
       data: dto,
     });
   }
 
-  remove(id: string) {
+  async remove(id: string) {
     return this.prisma.comment.delete({ where: { id } });
   }
 }

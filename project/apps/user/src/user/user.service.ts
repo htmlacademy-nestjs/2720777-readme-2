@@ -1,8 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { UserRole } from '@project/shared/app/types';
 import { UserRepository } from './user.repository';
 import { CreateUserDto } from '../auth/dto/create-user.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 const SALT_ROUNDS = 10;
 
@@ -35,5 +40,25 @@ export class UserService {
 
   findByEmail(email: string) {
     return this.userRepository.findByEmail(email);
+  }
+
+  async changePassword(userId: string, dto: ChangePasswordDto) {
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    const isValid = await this.comparePassword(
+      dto.currentPassword,
+      user.passwordHash,
+    );
+    if (!isValid) {
+      throw new UnauthorizedException('Неверный текущий пароль');
+    }
+
+    const newHash = await this.getHash(dto.newPassword);
+    await this.userRepository.updatePassword(userId, newHash);
+
+    return { message: 'Пароль успешно изменен' };
   }
 }
