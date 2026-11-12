@@ -6,15 +6,28 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
+  Query,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CommentRdo } from './rdo/comment.rdo';
+import { QueryCommentDto } from './dto/query-comment.dto';
+import { JwtAuthGuard } from '../auth/interfaces/guards/jwt-auth.guard';
+import { CurrentUser } from '../auth/interfaces/decorators/current-user.decorator';
+import type { AuthenticatedUser } from '../auth/interfaces/jwt-payload.interface';
 
 @ApiTags('comments')
 @Controller('posts/:postId/comments')
@@ -22,12 +35,12 @@ export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
   @Get()
-  @ApiOperation({})
-  @ApiParam({ name: 'postId' })
-  @ApiResponse({ status: 200, type: [CommentRdo] })
-  @ApiResponse({ status: 404 })
-  async findAll(@Param('postId') postId: string): Promise<CommentRdo[]> {
-    const comments = await this.commentService.findByPostId(postId);
+  @ApiOperation({ summary: 'Список комментариев публикации' })
+  async findAll(
+    @Param('postId', ParseUUIDPipe) postId: string,
+    @Query() query: QueryCommentDto,
+  ) {
+    const comments = await this.commentService.findByPostId(postId, query);
     return comments.map((comment) =>
       plainToInstance(CommentRdo, comment, { excludeExtraneousValues: true }),
     );
@@ -50,16 +63,18 @@ export class CommentController {
   }
 
   @Post()
-  @ApiOperation({})
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Создать комментарий' })
   @ApiParam({ name: 'postId' })
   @ApiResponse({ status: 201, type: CommentRdo })
   @ApiResponse({ status: 404 })
   async create(
-    @Param('postId') postId: string,
+    @Param('postId', ParseUUIDPipe) postId: string,
     @Body() dto: CreateCommentDto,
+    @CurrentUser() user: AuthenticatedUser,
   ): Promise<CommentRdo> {
-    const authorId = '00000000-0000-0000-0000-000000000000';
-    const comment = await this.commentService.create(postId, dto, authorId);
+    const comment = await this.commentService.create(postId, dto, user.id);
     return plainToInstance(CommentRdo, comment, {
       excludeExtraneousValues: true,
     });

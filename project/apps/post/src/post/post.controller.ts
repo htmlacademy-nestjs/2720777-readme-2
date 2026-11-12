@@ -7,8 +7,8 @@ import {
   HttpStatus,
   Param,
   Patch,
-  Post as PostMethod,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
@@ -16,6 +16,7 @@ import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PostRdo } from './rdo/post.rdo';
+import { QueryPostDto } from './dto/query-post.dto';
 
 @ApiTags('posts')
 @Controller('posts')
@@ -23,13 +24,9 @@ export class PostController {
   constructor(private readonly postService: PostService) {}
 
   @Get()
-  @ApiOperation({})
-  @ApiResponse({ status: 200, type: [PostRdo] })
-  async findAll(): Promise<PostRdo[]> {
-    const posts = await this.postService.findAll();
-    return posts.map((post) =>
-      plainToInstance(PostRdo, post, { excludeExtraneousValues: true }),
-    );
+  @ApiOperation({ summary: 'Список публикаций с фильтрацией и пагинацией' })
+  async findAll(@Query() query: QueryPostDto) {
+    return this.postService.findAll(query);
   }
 
   @Get(':id')
@@ -42,11 +39,10 @@ export class PostController {
     return plainToInstance(PostRdo, post, { excludeExtraneousValues: true });
   }
 
-  @PostMethod()
+  @Post()
   @ApiOperation({})
   @ApiResponse({ status: 201, type: PostRdo })
   async create(@Body() dto: CreatePostDto): Promise<PostRdo> {
-    // TODO: authorId — пока хардкод, позже возьмём из JWT
     const authorId = '00000000-0000-0000-0000-000000000000';
     const post = await this.postService.create(dto, authorId);
     return plainToInstance(PostRdo, post, { excludeExtraneousValues: true });
@@ -73,25 +69,7 @@ export class PostController {
     await this.postService.remove(id);
   }
 
-  @PostMethod(':id/like')
-  @ApiOperation({})
-  @ApiResponse({ status: 201, type: PostRdo })
-  async like(@Param('id') id: string): Promise<PostRdo> {
-    const userId = '00000000-0000-0000-0000-000000000000';
-    const post = await this.postService.addLike(id, userId);
-    return plainToInstance(PostRdo, post, { excludeExtraneousValues: true });
-  }
-
-  @Delete(':id/like')
-  @ApiOperation({})
-  @ApiResponse({ status: 200, type: PostRdo })
-  async unlike(@Param('id') id: string): Promise<PostRdo> {
-    const userId = '00000000-0000-0000-0000-000000000000';
-    const post = await this.postService.removeLike(id, userId);
-    return plainToInstance(PostRdo, post, { excludeExtraneousValues: true });
-  }
-
-  @PostMethod(':id/repost')
+  @Post(':id/repost')
   @ApiOperation({})
   @ApiResponse({ status: 201, type: PostRdo })
   async repost(@Param('id') id: string): Promise<PostRdo> {
