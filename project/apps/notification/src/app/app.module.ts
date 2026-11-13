@@ -1,10 +1,34 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { NotificationModule } from '../notification/notification.module';
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: 'apps/notification/.env',
+    }),
+    MailerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        transport: {
+          host: config.get('SMTP_HOST'),
+          port: config.get('SMTP_PORT'),
+          auth: config.get('SMTP_USER')
+            ? {
+                user: config.get('SMTP_USER'),
+                pass: config.get('SMTP_PASS'),
+              }
+            : undefined,
+        },
+        defaults: {
+          from: `"Readme Blog" <${config.get('SMTP_FROM')}>`,
+        },
+      }),
+    }),
+    NotificationModule,
+  ],
 })
 export class AppModule {}
