@@ -4,10 +4,10 @@ import { IsString, MaxLength, MinLength } from 'class-validator';
 export class CreateCommentDto {
   @ApiProperty({
     minLength: 1,
-    maxLength: 1000,
+    maxLength: 300,
   })
   @IsString()
   @MinLength(1)
-  @MaxLength(1000)
+  @MaxLength(300)
   content!: string;
 }

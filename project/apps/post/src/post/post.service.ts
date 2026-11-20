@@ -25,8 +25,13 @@ export class PostService {
     return post;
   }
 
+  async countByAuthor(authorId: string) {
+    return this.postRepository.countByAuthor(authorId);
+  }
+
   async create(dto: CreatePostDto, authorId: string): Promise<Post> {
-    return this.postRepository.create(dto, authorId);
+    const post = await this.postRepository.create(dto, authorId);
+    return post as Post;
   }
 
   async update(id: string, dto: UpdatePostDto, userId: string): Promise<Post> {
@@ -52,17 +57,11 @@ export class PostService {
   }
 
   async repost(postId: string, userId: string): Promise<Post> {
-    const original = await this.findById(postId);
-
-    return this.postRepository.create(
-      {
-        title: `Репост: ${original.title}`,
-        content: original.content,
-        tags: original.tags,
-        status: original.status,
-      },
-      userId,
-    );
+    const repost = await this.postRepository.repost(postId, userId);
+    if (!repost) {
+      throw new NotFoundException('Исходная публикация не найдена');
+    }
+    return repost as Post;
   }
 
   async addLike(postId: string, userId: string) {
@@ -79,5 +78,9 @@ export class PostService {
       throw new NotFoundException('Пост не найден');
     }
     return post;
+  }
+
+  async getNewPostsForMailing() {
+    return this.postRepository.getNewPostsForMailing();
   }
 }

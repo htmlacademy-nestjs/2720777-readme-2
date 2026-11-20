@@ -7,17 +7,49 @@ datasource db {
   provider = "postgresql"
 }
 
+enum PostStatus {
+  draft
+  published
+}
+
+enum PostType {
+  text
+  video
+  quote
+  photo
+  link
+}
+
 model Post {
-  id        String    @id @default(uuid())
-  title     String
-  content   String
-  authorId  String
+  id        String     @id @default(uuid())
+  type      PostType   @default(text)
+  status    PostStatus @default(published)
+  
+  title     String?
+  content   String?
+  announce  String?
+  
+  videoUrl        String?
+  quoteText       String?
+  quoteAuthor     String?
+  imageUrl        String?
+  linkUrl         String?
+  linkDescription String?
+
   tags      String[]
-  status    String    @default("draft")
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  
+  isRepost         Boolean @default(false)
+  originalPostId   String?
+  originalAuthorId String?
+
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   comments  Comment[]
-  likes     Like[] 
+  likes     Like[]
+
+  @@unique([authorId, originalPostId])
 }
 
 model Comment {
@@ -40,4 +72,10 @@ model Like {
   post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@unique([userId, postId])
+}
+
+model MailingState {
+  id            String   @id @default("global")
+  lastSentAt    DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }

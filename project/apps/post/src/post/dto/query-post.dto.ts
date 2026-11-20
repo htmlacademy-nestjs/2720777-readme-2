@@ -1,6 +1,14 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsOptional, IsInt, Min, Max, IsEnum, IsString } from 'class-validator';
+import {
+  IsOptional,
+  IsInt,
+  Min,
+  Max,
+  IsEnum,
+  IsString,
+  IsIn,
+} from 'class-validator';
 import { PostStatus } from '@project/shared/app/types';
 
 export class QueryPostDto {
@@ -43,4 +51,9 @@ export class QueryPostDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @ApiPropertyOptional({ enum: ['date', 'likes', 'comments'], default: 'date' })
+  @IsOptional()
+  @IsIn(['date', 'likes', 'comments'])
+  sortBy?: 'date' | 'likes' | 'comments';
 }

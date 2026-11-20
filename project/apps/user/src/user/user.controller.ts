@@ -6,6 +6,8 @@ import {
   UseGuards,
   Body,
   Patch,
+  Post,
+  Delete,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -46,6 +48,18 @@ export class UserController {
     return plainToInstance(UserRdo, user, { excludeExtraneousValues: true });
   }
 
+  @Get('emails/all')
+  @ApiOperation({ summary: 'Получить email всех пользователей для рассылки' })
+  async getAllEmails() {
+    return this.userService.getAllEmails();
+  }
+
+  @Get(':id/stats')
+  @ApiOperation({ summary: 'Статистика пользователя' })
+  async getStats(@Param('id') id: string) {
+    return this.userService.getUserStats(id);
+  }
+
   @Patch('change-password')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -56,5 +70,27 @@ export class UserController {
     @Body() dto: ChangePasswordDto,
   ) {
     return this.userService.changePassword(user.id, dto);
+  }
+
+  @Post(':id/subscribe')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Подписаться на пользователя' })
+  async subscribe(
+    @Param('id') targetId: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.userService.subscribe(user.id, targetId);
+  }
+
+  @Delete(':id/subscribe')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Отписаться от пользователя' })
+  async unsubscribe(
+    @Param('id') targetId: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.userService.unsubscribe(user.id, targetId);
   }
 }
