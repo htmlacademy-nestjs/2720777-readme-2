@@ -12,8 +12,12 @@ export class PostRepository {
   async findAll(query: QueryPostDto) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let orderBy: any = { createdAt: 'desc' };
-    if (query.sortBy === 'likes') orderBy = { likes: { _count: 'desc' } };
-    if (query.sortBy === 'comments') orderBy = { comments: { _count: 'desc' } };
+    if (query.sortBy === 'likes') {
+      orderBy = { likes: { _count: 'desc' } };
+    }
+    if (query.sortBy === 'comments') {
+      orderBy = { comments: { _count: 'desc' } };
+    }
 
     return this.prisma.post.findMany({
       where: {
@@ -43,7 +47,9 @@ export class PostRepository {
         },
       },
     });
-    if (!post) return null;
+    if (!post) {
+      return null;
+    }
     return { ...(post as Post), status: post.status as PostStatus };
   }
 
@@ -73,7 +79,9 @@ export class PostRepository {
 
   async repost(postId: string, userId: string) {
     const original = await this.findById(postId);
-    if (!original) return null;
+    if (!original) {
+      return null;
+    }
 
     const existing = await this.prisma.post.findUnique({
       where: {

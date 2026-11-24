@@ -49,4 +49,8 @@ export class UserRepository {
       { $pull: { subscribers: userId } },
     );
   }
+
+  async updateAvatar(id: string, avatarPath: string): Promise<void> {
+    await this.userModel.updateOne({ _id: id }, { avatar: avatarPath }).exec();
+  }
 }
