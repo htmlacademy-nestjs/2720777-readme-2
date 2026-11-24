@@ -8,6 +8,7 @@ import {
   IsEnum,
   IsString,
   IsIn,
+  IsArray,
 } from 'class-validator';
 import { PostStatus } from '@project/shared/app/types';
 
@@ -56,4 +57,13 @@ export class QueryPostDto {
   @IsOptional()
   @IsIn(['date', 'likes', 'comments'])
   sortBy?: 'date' | 'likes' | 'comments';
+
+  @ApiPropertyOptional({
+    type: [String],
+    description: 'Массив ID авторов для ленты',
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  authorIds?: string[];
 }

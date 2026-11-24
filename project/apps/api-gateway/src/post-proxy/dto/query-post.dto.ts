@@ -1,6 +1,13 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsOptional, IsInt, Min, Max, IsString } from 'class-validator';
+import {
+  IsOptional,
+  IsInt,
+  Min,
+  Max,
+  IsString,
+  IsArray,
+} from 'class-validator';
 
 export class QueryPostGatewayDto {
   @ApiPropertyOptional({})
@@ -27,4 +34,10 @@ export class QueryPostGatewayDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @ApiPropertyOptional({ type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  authorIds?: string[];
 }

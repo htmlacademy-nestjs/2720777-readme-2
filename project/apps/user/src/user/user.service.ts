@@ -49,8 +49,9 @@ export class UserService {
 
   async getUserStats(id: string) {
     const user = await this.userRepository.findById(id);
-    if (!user) throw new NotFoundException('Пользователь не найден');
-
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
     return {
       subscribersCount: user.subscribers?.length || 0,
     };
@@ -81,7 +82,9 @@ export class UserService {
       throw new BadRequestException('Нельзя подписаться на себя');
     }
     const target = await this.userRepository.findById(targetId);
-    if (!target) throw new NotFoundException('Пользователь не найден');
+    if (!target) {
+      throw new NotFoundException('Пользователь не найден');
+    }
 
     await this.userRepository.subscribe(userId, targetId);
     return { message: 'Вы подписались' };
@@ -90,5 +93,17 @@ export class UserService {
   async unsubscribe(userId: string, targetId: string) {
     await this.userRepository.unsubscribe(userId, targetId);
     return { message: 'Вы отписались' };
+  }
+
+  async updateAvatar(userId: string, filePath: string) {
+    const user = await this.userRepository.findById(userId);
+    if (!user) throw new NotFoundException('Пользователь не найден');
+
+    await this.userRepository.updateAvatar(userId, filePath);
+    return { message: 'Аватар обновлен', avatar: filePath };
+  }
+
+  async getSubscriptions(userId: string): Promise<string[]> {
+    return this.userRepository.getSubscriptions(userId);
   }
 }
