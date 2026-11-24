@@ -43,6 +43,39 @@ export class PostProxyController {
     return data;
   }
 
+  @Get('feed')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Лента пользователя' })
+  async getFeed(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() query: Record<string, unknown>,
+  ) {
+    const userServiceUrl = this.configService.get('USER_SERVICE_URL');
+    let subscriptions: string[] = [];
+    try {
+      const { data } = await firstValueFrom(
+        this.httpService.get(`${userServiceUrl}/users/subscriptions/me`, {
+          headers: { 'X-User-Id': user.id },
+        }),
+      );
+      subscriptions = data;
+    } catch (e) {
+      console.warn('Не удалось получить подписки', e);
+    }
+
+    const authorIds = [...new Set([...subscriptions, user.id])];
+
+    const postServiceUrl = this.configService.get('POST_SERVICE_URL');
+    const { data: posts } = await firstValueFrom(
+      this.httpService.get(`${postServiceUrl}/posts`, {
+        params: { ...query, authorIds: authorIds },
+      }),
+    );
+
+    return posts;
+  }
+
   @Get(':id')
   @ApiOperation({})
   async findById(@Param('id', ParseUUIDPipe) id: string) {

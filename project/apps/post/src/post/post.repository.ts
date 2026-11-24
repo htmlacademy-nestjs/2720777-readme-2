@@ -21,7 +21,10 @@ export class PostRepository {
 
     return this.prisma.post.findMany({
       where: {
-        authorId: query.authorId,
+        authorId:
+          query.authorIds && query.authorIds.length > 0
+            ? { in: query.authorIds }
+            : query.authorId,
         status: query.status,
         title: query.search
           ? { contains: query.search, mode: 'insensitive' }

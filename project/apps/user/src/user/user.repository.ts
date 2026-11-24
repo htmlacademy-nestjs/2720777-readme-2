@@ -53,4 +53,9 @@ export class UserRepository {
   async updateAvatar(id: string, avatarPath: string): Promise<void> {
     await this.userModel.updateOne({ _id: id }, { avatar: avatarPath }).exec();
   }
+
+  async getSubscriptions(userId: string): Promise<string[]> {
+    const user = await this.userModel.findById(userId).exec();
+    return user?.subscriptions || [];
+  }
 }

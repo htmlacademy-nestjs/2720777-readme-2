@@ -10,6 +10,7 @@ import {
   Delete,
   UseInterceptors,
   UploadedFile,
+  Headers,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -33,6 +34,14 @@ import { UploadAvatarDto } from './dto/upload-avatar.dto';
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Get('subscriptions/me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Получить список подписок текущего пользователя' })
+  async getMySubscriptions(@Headers('X-User-Id') userId: string) {
+    return this.userService.getSubscriptions(userId);
+  }
 
   @Get('me')
   @UseGuards(JwtAuthGuard)

@@ -102,4 +102,8 @@ export class UserService {
     await this.userRepository.updateAvatar(userId, filePath);
     return { message: 'Аватар обновлен', avatar: filePath };
   }
+
+  async getSubscriptions(userId: string): Promise<string[]> {
+    return this.userRepository.getSubscriptions(userId);
+  }
 }
